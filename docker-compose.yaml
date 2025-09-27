@@ -1,0 +1,12 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: datafleDB
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: pooge
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: database
+    volumes:
+      - ./db:/var/lib/mysql
