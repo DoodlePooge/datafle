@@ -25,3 +25,7 @@ spellcheck:
 # Runs the application locally to be able to view the website as it would in production based on the current code
 run:
 	node index.js
+
+# Registers slash commands
+deploy:
+	node deploy-commands.js
