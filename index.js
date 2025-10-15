@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { Client, Events, GatewayIntentBits } from "discord.js";
+import { Client, Events, GatewayIntentBits, MessageFlags } from "discord.js";
 import { insertWordle } from "./server/wordle.js";
 import { insertConn } from "./server/connections.js";
 import { insertAngle } from "./server/angle.js";
@@ -18,17 +18,37 @@ const client = new Client({
   ],
 });
 
-console.log(client.commands);
 client.commands = commands;
-console.log(commands);
 
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 });
 
-client.on(Events.InteractionCreate, (interaction) => {
+client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
-  console.log(interaction);
+  const command = interaction.client.commands.get(interaction.commandName);
+
+  if (!command) {
+    console.error(`No command matching ${interaction.commandName} was found.`);
+    return;
+  }
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp({
+        content: "There was an error while executing this command!",
+        flags: MessageFlags.Ephemeral,
+      });
+    } else {
+      await interaction.reply({
+        content: "There was an error while executing this command!",
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+  }
 });
 
 client.on(Events.MessageCreate, (message) => {
@@ -62,8 +82,6 @@ client.on(Events.MessageCreate, (message) => {
     let items = wordle[0].split(" ");
     let score = items[2].slice(0, 1);
     let puzzle = items[1];
-    console.log(score);
-    console.log(puzzle);
     insertWordle(message.author.id, puzzle, score);
   });
 

@@ -20,11 +20,24 @@ export const insertWordle = async (userId, puzzle, score) => {
 
 export const getWordle = async (userId) => {
   try {
-    const res = await pool.query("SELECT * FROM wordle WHERE userId = $1", [
-      userId,
-    ]);
-    console.log(res.rows);
-    return res;
+    const res = await pool.query(
+      "SELECT * FROM wordle WHERE userId = $1 ORDER BY score",
+      [userId]
+    );
+    return res.rows;
+  } catch (err) {
+    console.error("Error executing query", err.stack);
+    return err;
+  }
+};
+
+export const getWordleSum = async (userId, year) => {
+  try {
+    const res = await pool.query(
+      "SELECT * FROM wordlesummary WHERE userId = $1 AND year = $2 ORDER BY month",
+      [userId, year]
+    );
+    return res.rows;
   } catch (err) {
     console.error("Error executing query", err.stack);
     return err;
